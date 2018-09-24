@@ -501,9 +501,9 @@ pixel's value and saved it in the array ``error``::
     >>> positions = [(30., 30.), (40., 40.)]
     >>> apertures = CircularAperture(positions, r=3.)
     >>> data = np.ones((100, 100))
-    >>> error = 0.1 * data
+    >>> uncertainty = 0.1 * data
 
-    >>> phot_table = aperture_photometry(data, apertures, error=error)
+    >>> phot_table = aperture_photometry(data, apertures, uncertainty=uncertainty)
     >>> for col in phot_table.colnames:
     ...     phot_table[col].info.format = '%.8g'  # for consistent table output
     >>> print(phot_table)
@@ -537,8 +537,8 @@ time as the effective gain::
 
     >>> from photutils.utils import calc_total_error
     >>> effective_gain = 500   # seconds
-    >>> error = calc_total_error(data, bkg_error, effective_gain)    # doctest: +SKIP
-    >>> phot_table = aperture_photometry(data - bkg, apertures, error=error)    # doctest: +SKIP
+    >>> uncertainty = calc_total_error(data, bkg_error, effective_gain)    # doctest: +SKIP
+    >>> phot_table = aperture_photometry(data - bkg, apertures, uncertainty=uncertainty)    # doctest: +SKIP
 
 
 Pixel Masking
