@@ -526,7 +526,21 @@ def test_default_aperture_radius():
     intab = Table(data=[[19.6, 34.9, 37], [4.5, 40.1, 19.6]],
                   names=['x_0', 'y_0'])
     with pytest.warns(AstropyUserWarning):
-        basic_phot(image=image, init_guesses=intab)
+        basic_phot(image=img, init_guesses=intab)
+
+    daofind = DAOStarFinder(threshold=5.0, fwhm=3)
+    iter_phot = IterativelySubtractedPSFPhotometry(finder=daofind,
+                                                   group_maker=DAOGroup(2),
+                                                   bkg_estimator=None,
+                                                   psf_model=prf,
+                                                   fitshape=7)
+
+    intab = Table(data=[[19.6, 34.9, 37], [4.5, 40.1, 19.6]],
+                  names=['x_0', 'y_0'])
+    with pytest.warns(AstropyUserWarning):
+        iter_phot(image=img, init_guesses=intab)
+    with pytest.warns(AstropyUserWarning):
+        iter_phot(image=img)
 
 
 @pytest.mark.skipif('not HAS_SCIPY')
