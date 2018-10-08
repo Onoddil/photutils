@@ -521,6 +521,10 @@ Bug Fixes
   - Fixed a bug in the computation of ``sky_bbox_ul``,
     ``sky_bbox_lr``, ``sky_bbox_ur`` in the ``SourceCatalog``. [#716]
 
+- ``photutils.psf``
+  - Fixed an issue where ``aperture_radius`` would fail to be defined
+    by a PSF model without a FWHM or sigma attribute. [#740]
+
 Other Changes and Additions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
