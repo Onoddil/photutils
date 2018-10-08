@@ -257,6 +257,10 @@ class BasicPSFPhotometry:
             # size of the fitting box.
             else:
                 self.aperture_radius = float(np.amin(self.fitshape))
+                warnings.warn('aperture_radius is None and could not '
+                              'be determined by psf_model. Setting '
+                              'radius to the smallest fitshape size.',
+                              AstropyUserWarning)
 
         if self.aperture_radius is None:
             if init_guesses is None:
@@ -741,6 +745,10 @@ class IterativelySubtractedPSFPhotometry(BasicPSFPhotometry):
                 # size of the fitting box.
                 else:
                     self.aperture_radius = float(np.amin(self.fitshape))
+                    warnings.warn('aperture_radius is None and could not '
+                                  'be determined by psf_model. Setting '
+                                  'radius to the smallest fitshape size.',
+                                  AstropyUserWarning)
 
             output_table = self._do_photometry(['x_0', 'y_0', 'flux_0'])
         return output_table
