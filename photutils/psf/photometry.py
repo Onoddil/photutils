@@ -251,6 +251,12 @@ class BasicPSFPhotometry:
             elif hasattr(self.psf_model, 'sigma'):
                 self.aperture_radius = (self.psf_model.sigma.value *
                                         gaussian_sigma_to_fwhm)
+            # If PSF model doesn't have FWHM or sigma value -- as it
+            # is not a Gaussian; most likely because it's an ePSF --
+            # then we fall back on fitting a circle of the average
+            # size of the fitting box.
+            else:
+                self.aperture_radius = float(np.amin(self.fitshape))
 
         if self.aperture_radius is None:
             if init_guesses is None:
@@ -729,6 +735,12 @@ class IterativelySubtractedPSFPhotometry(BasicPSFPhotometry):
                 elif hasattr(self.psf_model, 'sigma'):
                     self.aperture_radius = (self.psf_model.sigma.value *
                                             gaussian_sigma_to_fwhm)
+                # If PSF model doesn't have FWHM or sigma value -- as it
+                # is not a Gaussian; most likely because it's an ePSF --
+                # then we fall back on fitting a circle of the average
+                # size of the fitting box.
+                else:
+                    self.aperture_radius = float(np.amin(self.fitshape))
 
             output_table = self._do_photometry(['x_0', 'y_0', 'flux_0'])
         return output_table
