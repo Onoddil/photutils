@@ -485,28 +485,6 @@ def test_psf_boundary():
 
 
 @pytest.mark.skipif('not HAS_SCIPY')
-def test_aperture_radius_value_error():
-    """
-    Test that a ValueError is raised for tabular PSF models when
-    aperture_radius is not defined.
-    """
-
-    prf = DiscretePRF(test_psf, subsampling=1)
-
-    basic_phot = BasicPSFPhotometry(group_maker=DAOGroup(2),
-                                    bkg_estimator=None, psf_model=prf,
-                                    fitshape=7)
-
-    with pytest.raises(ValueError):
-        basic_phot(image=image)
-
-    # with initial guesses, but without a "flux_0" column
-    intab = Table(data=[[1], [1]], names=['x_0', 'y_0'])
-    with pytest.raises(ValueError):
-        basic_phot(image=image, init_guesses=intab)
-
-
-@pytest.mark.skipif('not HAS_SCIPY')
 def test_psf_boundary_gaussian():
     """
     Test psf_photometry with discrete PRF model at the boundary of the data.
