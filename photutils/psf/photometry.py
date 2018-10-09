@@ -254,9 +254,11 @@ class BasicPSFPhotometry:
             # If PSF model doesn't have FWHM or sigma value -- as it
             # is not a Gaussian; most likely because it's an ePSF --
             # then we fall back on fitting a circle of the average
-            # size of the fitting box.
+            # size of the fitting box. As ``fitshape`` is the width
+            # of the box, we need (width-1)/2 as the radius.
             else:
-                self.aperture_radius = float(np.amin(self.fitshape))
+                self.aperture_radius = float(np.amin((np.asanyarray(
+                                             self.fitshape) - 1) / 2))
                 warnings.warn('aperture_radius is None and could not '
                               'be determined by psf_model. Setting '
                               'radius to the smallest fitshape size.',
@@ -742,9 +744,11 @@ class IterativelySubtractedPSFPhotometry(BasicPSFPhotometry):
                 # If PSF model doesn't have FWHM or sigma value -- as it
                 # is not a Gaussian; most likely because it's an ePSF --
                 # then we fall back on fitting a circle of the average
-                # size of the fitting box.
+                # size of the fitting box. As ``fitshape`` is the width
+                # of the box, we need (width-1)/2 as the radius.
                 else:
-                    self.aperture_radius = float(np.amin(self.fitshape))
+                    self.aperture_radius = float(np.amin((np.asanyarray(
+                                                 self.fitshape) - 1) / 2))
                     warnings.warn('aperture_radius is None and could not '
                                   'be determined by psf_model. Setting '
                                   'radius to the smallest fitshape size.',
