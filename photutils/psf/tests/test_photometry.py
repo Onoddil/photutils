@@ -485,24 +485,6 @@ def test_psf_boundary():
 
 
 @pytest.mark.skipif('not HAS_SCIPY')
-def test_aperture_radius_value_error():
-    """
-    Test psf_photometry with discrete PRF model at the boundary of the data.
-    """
-
-    prf = DiscretePRF(test_psf, subsampling=1)
-
-    basic_phot = BasicPSFPhotometry(group_maker=DAOGroup(2),
-                                    bkg_estimator=None, psf_model=prf,
-                                    fitshape=7)
-
-    intab = Table(data=[[1], [1]], names=['x_0', 'y_0'])
-    with pytest.warns(AstropyUserWarning, match='aperture_radius is None and '
-                                                'could not be determined'):
-        basic_phot(image=image, init_guesses=intab)
-
-
-@pytest.mark.skipif('not HAS_SCIPY')
 def test_default_aperture_radius():
     """
     Test psf_photometry with non-Gaussian model, such that it raises a
