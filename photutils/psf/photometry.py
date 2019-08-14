@@ -261,7 +261,10 @@ class BasicPSFPhotometry:
                                              self.fitshape) - 1) / 2))
                 warnings.warn('aperture_radius is None and could not '
                               'be determined by psf_model. Setting '
-                              'radius to the smallest fitshape size.',
+                              'radius to the smallest fitshape size. '
+                              'If fitshape is significantly larger than '
+                              'the psf_model core lengthscale, consider '
+                              'supplying a specific aperture_radius.',
                               AstropyUserWarning)
 
         if init_guesses is not None:
@@ -727,7 +730,10 @@ class IterativelySubtractedPSFPhotometry(BasicPSFPhotometry):
                                                  self.fitshape) - 1) / 2))
                     warnings.warn('aperture_radius is None and could not '
                                   'be determined by psf_model. Setting '
-                                  'radius to the smallest fitshape size.',
+                                  'radius to the smallest fitshape size. '
+                                  'If fitshape is significantly larger than '
+                                  'the psf_model core lengthscale, consider '
+                                  'supplying a specific aperture_radius.',
                                   AstropyUserWarning)
 
             output_table = self._do_photometry(['x_0', 'y_0', 'flux_0'])
