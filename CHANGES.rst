@@ -53,6 +53,10 @@ API changes
     ``BasicPSFPhotometry``, ``IterativelySubtractedPSFPhotometry`` and
     ``DAOPhotPSFPhotometry``. [#745]
 
+  - Updated handling of ``aperture_radius`` for PSF models without a FWHM or
+    sigma attribute, raising a warning and setting the diamter to that of
+    the smaller of ``fitshape``'s dimensions. [#740]
+
 - ``photutils.segmentation``
 
   - Removed the deprecated ``SegmentationImage`` methods ``cmap`` and
@@ -112,6 +116,11 @@ Bug Fixes
 
     - Fixed an issue in ``source_properties`` when the input ``data``
       is a ``Quantity`` array. [#963]
+
+
+API changes
+^^^^^^^^^^^
+>>>>>>> Updated changelog to reflect increment to 0.8, and added catch for BasicPSFPhotometry allowing for init_guesses to be passed but needing to catch for no flux_0 column before falling back on default radius
 
 
 0.7 (2019-08-14)
@@ -241,8 +250,8 @@ Bug Fixes
   - Fixed a bug in the ``EPSFStar`` ``register_epsf`` and
     ``compute_residual_image`` computations. [#885]
 
-  - Added fallback ``aperture_radius`` for PSF models without a FWHM or
-    sigma attribute, raising a warning. [#903, #740]
+  - A ValueError is raised if ``aperture_radius`` is not input and
+    cannot be determined from the input ``psf_model``. [#903]
 
   - Fixed normalization of ePSF model, now correctly normalizing on
     undersampled pixel grid. [#817]
