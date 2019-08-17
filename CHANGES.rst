@@ -24,6 +24,8 @@ API changes
   - Added ``extra_output_cols`` as a parameter to ``BasicPSFPhotometry``,
     ``IterativelySubtractedPSFPhotometry`` and ``DAOPhotPSFPhotometry``. [#745]
 
+  - Extended PSF models ``evaluate`` functions to properly handle the passing
+    of two 1D ``x`` and ``y`` arrays, expanding to 2D arrays. [#951]
 
 0.7 (2019-08-14)
 ----------------
