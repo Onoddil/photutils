@@ -480,12 +480,16 @@ class FittableImageModel(Fittable2DModel):
             input indices will be multipled by this factor.
         """
 
+        # Check whether two 1D arrays were input and propagate via meshgrid,
+        # handling slicing.
+        x, y = _xy_1d_expand(x, y)
+
         if use_oversampling:
-            xi = self._oversampling[0] * (np.asarray(x) - x_0)
-            yi = self._oversampling[1] * (np.asarray(y) - y_0)
+            xi = self._oversampling[0] * (x - x_0)
+            yi = self._oversampling[1] * (y - y_0)
         else:
-            xi = np.asarray(x) - x_0
-            yi = np.asarray(y) - y_0
+            xi = x - x_0
+            yi = y - y_0
 
         xi += self._x_origin
         yi += self._y_origin
@@ -732,8 +736,12 @@ class EPSFModel(FittableImageModel):
         parameters.
         """
 
-        xi = np.asarray(x) - x_0 + self._x_origin
-        yi = np.asarray(y) - y_0 + self._y_origin
+        # Check whether two 1D arrays were input and propagate via meshgrid,
+        # handling slicing.
+        x, y = _xy_1d_expand(x, y)
+
+        xi = x - x_0 + self._x_origin
+        yi = y - y_0 + self._y_origin
 
         evaluated_model = flux * self.interpolator.ev(xi, yi)
 
@@ -1069,6 +1077,10 @@ class IntegratedGaussianPRF(Fittable2DModel):
     def evaluate(self, x, y, flux, x_0, y_0, sigma):
         """Model function Gaussian PSF model."""
 
+        # Check whether two 1D arrays were input and propagate via meshgrid,
+        # handling slicing.
+        x, y = _xy_1d_expand(x, y)
+
         return (flux / 4 *
                 ((self._erf((x - x_0 + 0.5) / (np.sqrt(2) * sigma)) -
                   self._erf((x - x_0 - 0.5) / (np.sqrt(2) * sigma))) *
@@ -1146,6 +1158,10 @@ class PRFAdapter(Fittable2DModel):
     def evaluate(self, x, y, flux, x_0, y_0):
         """The evaluation function for PRFAdapter."""
 
+        # Check whether two 1D arrays were input and propagate via meshgrid,
+        # handling slicing.
+        x, y = _xy_1d_expand(x, y)
+
         if self.xname is None:
             dx = x - x_0
         else:
@@ -1178,3 +1194,34 @@ class PRFAdapter(Fittable2DModel):
                                   lambda x: yi-0.5, lambda x: yi+0.5,
                                   **self._dblquadkwargs)[0]
         return out
+
+
+def _xy_1d_expand(x, y):
+    """
+    Convenience function to determine whether ``x`` and ``y`` coordinates are
+    1D, and propagate up to a full x-by-y meshgrid, handling the case where
+    arrays are 1D because of slicing.
+
+    Parameters
+    ----------
+    x : `~numpy.ndarray` or list-like
+        The x-coordinates to be evaluated.
+    y : `~numpy.ndarray` or list-like
+        The y-coordinates to be evaluated.
+
+    Returns
+    -------
+    x : 2D `~numpy.ndarray`
+        The x-coordinates to be evaluated, in a (len(y), len(x)) meshgrid.
+    y : 2D `~numpy.ndarray`
+        The y-coordinates to be evaluated, in a (len(y), len(x)) meshgrid.
+    """
+
+    x, y = np.asarray(x), np.asarray(y)
+    # a 1D array of both x and y coordinates which are both entirely unique
+    # numbers implies 1D arrays have been passed
+    if (len(x.shape) == 1 and len(np.unique(x)) == len(x) and
+            len(y.shape) == 1 and len(np.unique(y)) == len(y)):
+        y, x = np.meshgrid(y, x)
+
+    return x, y

@@ -13,7 +13,7 @@ from numpy.testing import assert_allclose
 import pytest
 
 from ..models import (FittableImageModel, GriddedPSFModel,
-                      IntegratedGaussianPRF, PRFAdapter)
+                      IntegratedGaussianPRF, PRFAdapter, EPSFModel)
 from ...segmentation import detect_sources, source_properties
 
 try:
@@ -390,3 +390,67 @@ class TestPRFAdapter:
         # it's a bit of a guess that the above itol is appropriate, but
         # it should be close
         assert_allclose(np.sum(eval11), np.sum(eval22), atol=itol*100)
+
+
+@pytest.mark.skipif('not HAS_SCIPY')
+class TestPSFEvaluate:
+    def run_model(self, model, shape_2d, len_1d, flux_2d, flux_1d, *args):
+        x, y = np.arange(0, 5), np.arange(0, 5)
+        fit = model.evaluate(x, y, *args)
+        assert np.all([fit.shape[i] == shape_2d[i] for i in [0, 1]])
+        assert_allclose(np.sum(fit), flux_2d, atol=1e-5)
+
+        x = np.array([[i]*5 for i in range(0, 5)])
+        y = np.array([np.arange(0, 5) for i in range(0, 5)])
+        fit = model.evaluate(x, y, *args)
+        assert np.all([fit.shape[i] == shape_2d[i] for i in [0, 1]])
+        assert_allclose(np.sum(fit), flux_2d, atol=1e-5)
+
+        # should be 2 x 3; x = [2, 3], y = [0, 1, 2]
+        cut = (x > 1) & (x < 4) & (y >= 0) & (y < 3)
+        x = x[cut]
+        y = y[cut]
+        fit = model.evaluate(x, y, *args)
+        assert len(fit) == len_1d
+        assert_allclose(np.sum(fit), flux_1d, atol=1e-5)
+
+    def test_PSF_evaluate(self):
+        x_0, y_0, f = 2, 2, 1
+        shape_2d, len_1d, flux_2d, flux_1d = (5, 5), 6, 50, 12
+        for _model in [EPSFModel, FittableImageModel]:
+            model = _model(data=2*np.ones((20, 20), float), oversampling=4,
+                           normalize=False)
+            self.run_model(model, shape_2d, len_1d, flux_2d, flux_1d, f,
+                           x_0, y_0)
+
+        # now we test that this still runs on GriddablePSFModel, faking the
+        # same flat PSF grid, to be interpolated across the edges of a 10x10
+        # grid
+        psfs = [2*np.ones((20, 20), float)]*4
+        grid_xypos = [(0, 0), (0, 10), (10, 0), (10, 10)]
+        meta = {}
+        meta['grid_xypos'] = grid_xypos
+        meta['oversampling'] = 4
+        model = GriddedPSFModel(NDData(psfs, meta=meta))
+        self.run_model(model, shape_2d, len_1d, flux_2d, flux_1d, f, x_0, y_0)
+
+        # reset the parameters for pixel-grid-based Gaussians; the flux
+        # values come from integrating the 2D Gaussian across the x and y
+        # limits in each case,
+        # flux/4 * prod_{i = x, y} (erf(i_max-i_pos0+0.5)/sqrt(2) -
+        #                           erf(i_min-i_pos0-0.5)/sqrt(2)),
+        # or, equivalently, summing each IntegratedGaussianPRF pixel, with
+        # sigma=1. Cases are x, y = 0 -> 5; x = 1 -> 2, y = 0 -> 2, as used
+        # in run_model for the 2D and 1D cases respectively.
+        shape_2d, len_1d, flux_2d, flux_1d = (5, 5), 6, 0.975316, 0.428047
+        sigma = 1
+        model = IntegratedGaussianPRF(sigma)
+        self.run_model(model, shape_2d, len_1d, flux_2d, flux_1d, f, x_0, y_0,
+                       sigma)
+
+        # fake another IntegratedGaussianPRF via PRFAdapter to reuse the
+        # above values
+        psf = Gaussian2D(amplitude=1/(2*np.pi), cov_matrix=np.array([[1, 0],
+                                                                     [0, 1]]))
+        model = PRFAdapter(psf, renormalize_psf=False)
+        self.run_model(model, shape_2d, len_1d, flux_2d, flux_1d, f, x_0, y_0)
