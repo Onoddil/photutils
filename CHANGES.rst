@@ -54,7 +54,7 @@ API changes
     ``DAOPhotPSFPhotometry``. [#745]
 
   - Updated handling of ``aperture_radius`` for PSF models without a FWHM or
-    sigma attribute, raising a warning and setting the diamter to that of
+    sigma attribute, raising a warning and setting the diameter to that of
     the smaller of ``fitshape``'s dimensions. [#740]
 
 - ``photutils.segmentation``
@@ -116,11 +116,6 @@ Bug Fixes
 
     - Fixed an issue in ``source_properties`` when the input ``data``
       is a ``Quantity`` array. [#963]
-
-
-API changes
-^^^^^^^^^^^
->>>>>>> Updated changelog to reflect increment to 0.8, and added catch for BasicPSFPhotometry allowing for init_guesses to be passed but needing to catch for no flux_0 column before falling back on default radius
 
 
 0.7 (2019-08-14)
